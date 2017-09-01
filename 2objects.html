@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html>
+<style>
+  body {
+    background-image : url(http://www.jpl.nasa.gov/images/dawn/20110321/dawn20110321-full.jpg);
+    scroll           : auto;
+  }
+
+  #red_planet {
+    border                : none;
+    border-radius         : 50%;
+    position              : absolute;
+    top                   : 50%;
+    left                  : 40%;
+    height                : 20px;
+    width                 : 20px;
+    background            : rgba(160, 0, 0, 0.65);
+    background-image      : url(http://www.nasa.gov/images/content/208852main_merc_craters.jpg);
+    background-repeat     : no-repeat;
+    background-size       : cover;
+    background-blend-mode : multiply;
+    transform             : translateY(-50%);
+    z-index               : -1;
+  }
+
+  #blue_planet {
+    border                : none;
+    border-radius         : 50%;
+    position              : absolute;
+    top                   : 50%;
+    left                  : 60%;
+    height                : 30px;
+    width                 : 30px;
+    background            : rgba(0, 0, 160, 0.65);
+    background-image      : url(http://photojournal.jpl.nasa.gov/jpegMod/PIA02940_modest.jpg);
+    background-repeat     : no-repeat;
+    background-size       : cover;
+    background-blend-mode : multiply;
+    transform             : translateY(-50%);
+    z-index               : -1;
+  }
+
+  form {
+    display       : inline-block;
+    background    : rgba(255,255,255,0.75);
+    border        : 1px solid white;
+    border-radius : 5px;
+    padding: 10px;
+    margin: 10px;
+  }
+
+  #info_box {
+    border   : none;
+    position : absolute;
+    bottom   : 10px;
+    left: 10px;
+  }
+
+  div, textarea {
+    resize        : none;
+    border        : none;
+    border-radius : 5px;
+  }
+
+</style>
+
+<body id="body" onLoad="setWindowSize()">
+
+    <div>
+        <form>
+            Red Mass in kg:
+            <br>
+            <input value="5.972" type="number" id="red_mass"> X 10^ <input value="24" type="number" id="red_mass_power">
+            <br>
+            Blue Mass in kg:
+            <br>
+            <input value="7.34767309" type="number" id="blue_mass"> X 10^ <input value="22" type="number" id="blue_mass_power">
+            <br>
+            Distance Between Objects in km:
+            <br>
+            <input value="384400" type="number" id="distance_between_planets">
+            <br>
+            Red Diameter in km:
+            <br>
+            <input value="12742" type="number" id="red_diameter">
+            <br>
+            Blue Diameter in km:
+            <br>
+            <input value="3474" type="number" id="blue_diameter">
+            <br>
+            <input type="button" value="Submit" onClick="forceOfGravity()">
+        </form>
+    </div>
+
+    <div>
+        <form>
+            Zoom In:
+            <br>
+            <input type="button" value=" + " onClick="zoomIn()">
+            <br>
+            Zoom Out:
+            <br>
+            <input type="button" value=" - " onClick="zoomOut()">
+            <br>
+            <textarea id="scale">Scale: 100km = one pixel</textarea>
+            <br>
+        </form>
+    </div>
+
+    <div id="red_planet"></div>
+    <div id="blue_planet"></div>
+
+    <div id="info_box">
+        <textarea id="force_of_attraction">Force of Attraction: </textarea>
+        <textarea id="surface_gravity_of_red">Surface Gravity of Red: </textarea>
+        <textarea id="density_of_red">Density of Red: </textarea>
+        <textarea id="surface_gravity_of_blue">Surface of Gravity of Blue: </textarea>
+        <textarea id="density_of_blue">Density of Blue: </textarea>
+    </div>
+
+</body>
+
+<script type="text/javascript">
+
+var red_mass = document.getElementById('red_mass');
+var red_mass_power = document.getElementById('red_mass_power');
+
+var blue_mass = document.getElementById('blue_mass');
+var blue_mass_power = document.getElementById('blue_mass_power');
+
+var distance_between_planets = document.getElementById('distance_between_planets');
+var red_diameter = document.getElementById('red_diameter');
+var blue_diameter = document.getElementById('blue_diameter');
+
+
+var screen_width = null;
+var scale = 0.25;
+
+  function setWindowSize() {
+    screen_width = screen.width / 3.5;
+    forceOfGravity()
+  }
+
+  function forceOfGravity() {
+    var gravity = 6.67384e-11;
+
+    var red_planet_mass = (red_mass.value) * (Math.pow(10, (red_mass_power.value)));
+    var blue_planet_mass = (blue_mass.value) * (Math.pow(10, (blue_mass_power.value)));
+
+    var distance = distance_between_planets.value / 0.001;
+
+    var red_planet_radius = red_diameter.value / 2;
+    var blue_planet_radius = blue_diameter.value / 2;
+
+    var surface_gravity_red_radius = red_planet_radius * 1000;
+    var surface_gravity_blue_radius = blue_planet_radius * 1000;
+
+    var surface_gravity_red = ((gravity * red_planet_mass) / (surface_gravity_red_radius * surface_gravity_red_radius)).toExponential(5);
+    var surface_gravity_blue = ((gravity * blue_planet_mass) / (surface_gravity_blue_radius * surface_gravity_blue_radius)).toExponential(5);
+
+    var force = (gravity * ((red_planet_mass * blue_planet_mass) / (distance * distance))).toExponential(5);
+
+    document.getElementById('force_of_attraction').innerHTML = "Force of Attraction: \n" + force + " N";
+    document.getElementById('surface_gravity_of_red').innerHTML = "Surface Gravity of Red: \n" + surface_gravity_red + " m/s2";
+    document.getElementById('surface_gravity_of_blue').innerHTML = "Surface Gravity of Blue: \n" + surface_gravity_blue + " m/s2";
+
+    var red_volume = ((4 * 3.14159265359 * Math.pow(red_planet_radius, 3)) / 3);
+    var blue_volume = ((4  * 3.14159265359 * Math.pow(blue_planet_radius, 3)) / 3);
+    var red_density = ((red_planet_mass / red_volume) / 1000000000000).toExponential(5);
+    var blue_density = ((blue_planet_mass / blue_volume) / 1000000000000).toExponential(5);
+
+    document.getElementById('density_of_red').innerHTML = "Density of Red: \n" + red_density + " g/cm3";
+    document.getElementById('density_of_blue').innerHTML = "Density of Blue: \n" + blue_density + " g/cm3";
+    updateSize();
+  }
+  
+  function updateSize() {
+  	var red_planet = document.getElementById('red_planet');
+  	var blue_planet = document.getElementById('blue_planet');
+
+    var distance = distance_between_planets.value * scale / 100;
+    var red_planet_radius = red_diameter.value * scale / 100;
+    var blue_planet_radius = blue_diameter.value * scale / 100;
+
+    red_planet.style.height = red_planet_radius.toString() + "px";
+    red_planet.style.width = red_planet_radius.toString() + "px";
+    red_planet.style.left = (screen_width - red_planet_radius).toString() + "px";
+    blue_planet.style.height = blue_planet_radius.toString() + "px";
+    blue_planet.style.width = blue_planet_radius.toString() + "px";
+    blue_planet.style.left = (screen_width + distance).toString() + "px";
+    document.getElementById('scale').innerHTML = "Scale: " + ((1 / scale) * 100) + "km = one pixle";
+  }
+
+  function zoomIn() {
+    scale = scale * 2;
+    updateSize();
+  }
+
+  function zoomOut() {
+    scale = scale / 2;
+    updateSize();
+  }
+
+
+</script>
+</html>
